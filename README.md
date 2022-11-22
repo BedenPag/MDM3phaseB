@@ -5,13 +5,21 @@ Factors:
 
 Age
 Time of the year - flu season? 
+
 Size of hospital - bed to population ratio
+
 Area - population density
+
 long term illness
+
 Staff numbers
+
 Staff preformance
+
 day of the week
+
 Death
+
 resources - cancelation of surgery for example
 
 
