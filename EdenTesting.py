@@ -8,8 +8,11 @@ Created on Tue Sep 27 18:07:54 2022
 
 import math
 import matplotlib.pyplot as plt
+import scipy.stats as sps
 import pandas as pd
 import numpy as np
+import seaborn as sns
+sns.set(style='ticks')
 
 mydata= pd.read_excel('C:/Users/HOM-0317-TB01/Documents/GitHub/MDM3phaseB/PlainData.xlsx')
 
@@ -32,22 +35,33 @@ for i in means:
 
 # Create a dictionary of the illness and the data
 illnessData = dict(zip(illness, data))
-print(illnessData)
+
 
 # Plot each illness as a probability density function
+#for i in illnessData:
+#    plt.hist(illnessData[i], density=True, bins=int(max(illnessData[i])))
+#    plt.title(i)
+#    plt.xlabel('Days')
+#    plt.ylabel('Probability')
+#    plt.show()
+
+# Plot each illness as a cumulative probability density function
 for i in illnessData:
-    plt.hist(illnessData[i], density=True, bins=int(max(illnessData[i])))
+    plt.hist(illnessData[i], density=True, cumulative=True, bins=int(max(illnessData[i])))
     plt.title(i)
     plt.xlabel('Days')
     plt.ylabel('Probability')
+    # plot a line for the cumulative probability
+    twat = plt.plot(np.sort(illnessData[i]), np.linspace(0, 1, len(illnessData[i]), endpoint=False))
+    ax = plt.gca()
+    line = ax.lines[0]
+    xydata = line.get_xydata()
+    print(xydata)
     plt.show()
+    
 
-# find the probability of the length of stay for each illness
-for i in illnessData:
-    print(i)
-    for j in illnessData[i]:
-        print(j)
-        print(np.sum(illnessData[i] < j)/len(illnessData[i]))
+
+
 
 
 
