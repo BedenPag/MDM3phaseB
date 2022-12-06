@@ -3,7 +3,8 @@ Team legends
 
 Factors:
 
-Age
+Age - DATA ON THE WORD DOCUMENT ON TEAMS
+
 Time of the year - flu season? 
 
 Size of hospital - bed to population ratio
