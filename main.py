@@ -61,7 +61,7 @@ class Patient:
     # -NEEDS UPDATING TO EXPONENTIAL- Returns distribution of probability of leaving per day for given illness
     # Commented out code is too slow
     def probability_distribution(self):
-        dist = np.random.normal(self.los, 5)
+        dist = np.random.normal(self.los, 10, size=100)
         # dist = np.random.exponential(self.los, size=100)
         # counts = plt.hist(dist, density=True, cumulative=True, bins=int(max(dist)))
         return dist     # counts[0]
