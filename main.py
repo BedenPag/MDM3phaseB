@@ -1,14 +1,28 @@
 # PROJECT AIM: Forcast bed occupancy based on distribution data and patient parameters
 # e.g Age, Area, Illness, Time of year (flu season etc.)
 
+# CURRENT ISSUES: using pyplot to generate counts is way too slow, need a better method - see line 62
+
 # !CAUTION! Colorama used to format output, may cause errors in other IDE's
+import random as rn
 import numpy as np
+import matplotlib.pyplot as plt
 from colorama import Fore, Style
 
 # Simulation parameters
 AD_RATE = 55                # Patient admission rate (number per day)
 SIM_TIME = 90               # Simulation run time (days)
 SEED = 1
+ILLNESSES = {
+    'Myocardial Infarction': 6.90,
+    'Stroke': 28.20,
+    'COVID 19': 15.95,
+    'Fracture of Femur': 30.55,                             # Dictionary of illnesses and their aLOS
+    'Atrial Fibrillation': 4.25,
+    'Pneumonia': 14.9,
+    'Endocrine, Nutritional and Metabolic Diseases': 3.50,
+    'COPD': 7.05
+}
 
 
 # Hospital object that treats Patient objects
@@ -34,30 +48,23 @@ class Hospital:
 class Patient:
 
     def __init__(self, admission):
-        self.illness = assign_illness()
+        self.illness = rn.choice(list(ILLNESSES.keys()))
         self.los = self.assign_a_los()
         self.discharge_prob = self.probability_distribution()
         self.ad_day = admission
 
     # Returns average length of stay for each illness
     def assign_a_los(self):
-        a_los = [10, 12, 8, 9]
-        los = a_los[self.illness.index(1)]
+        los = ILLNESSES[self.illness]
         return los
 
     # -NEEDS UPDATING TO EXPONENTIAL- Returns distribution of probability of leaving per day for given illness
+    # Commented out code is too slow
     def probability_distribution(self):
-        dist = np.random.normal(self.los, 2, size=100)
-        dist = dist / np.linalg.norm(dist)
-        return dist
-
-
-# Returns randomly assigned illness
-def assign_illness():
-    illnesses = [0, 0, 0, 0]                    # Discrete set of possible illnesses
-    ind = np.random.randint(0, len(illnesses))
-    illnesses[ind] = 1
-    return illnesses
+        dist = np.random.normal(self.los, 5)
+        # dist = np.random.exponential(self.los, size=100)
+        # counts = plt.hist(dist, density=True, cumulative=True, bins=int(max(dist)))
+        return dist     # counts[0]
 
 
 # Runs the simulation using simulation parameters
@@ -77,7 +84,7 @@ def run(days, ad_rate):
 
 if __name__ == '__main__':
     print(f"Start Simulation")
-    np.random.seed(SEED)        # Allows repeat results i.e same random values generated per seed
-    run(SIM_TIME, AD_RATE)
-
-
+    # Allows repeat results i.e same random values generated per seed
+    np.random.seed(SEED)
+    rn.seed(SEED)
+    run(SIM_TIME, AD_RATE)  # Begins simulation
