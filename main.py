@@ -8,20 +8,21 @@ import random as rn
 import numpy as np
 import matplotlib.pyplot as plt
 from colorama import Fore, Style
+from numpy.random import choice
 
 # Simulation parameters
 AD_RATE = 55                # Patient admission rate (number per day)
 SIM_TIME = 90               # Simulation run time (days)
 SEED = 1
 ILLNESSES = {
-    'Myocardial Infarction': 6.90,
-    'Stroke': 28.20,
-    'COVID 19': 15.95,
-    'Fracture of Femur': 30.55,                             # Dictionary of illnesses and their aLOS
-    'Atrial Fibrillation': 4.25,
-    'Pneumonia': 14.9,
-    'Endocrine, Nutritional and Metabolic Diseases': 3.50,
-    'COPD': 7.05
+    'Myocardial Infarction': [7.3, 6.5],
+    'Stroke': [27.2, 29.2],
+    'COVID 19': [15.7, 16.2],
+    'Fracture of Femur': [32.3, 28.8],                             # Dictionary of illnesses and their aLOS
+    'Atrial Fibrillation': [4.4, 4.1],
+    'Pneumonia': [13.8, 16.0],
+    'Endocrine, Nutritional and Metabolic Diseases': [4.0, 3.0],
+    'COPD': [6.8, 7.3]
 }
 
 
@@ -48,6 +49,7 @@ class Hospital:
 class Patient:
 
     def __init__(self, admission):
+        self.gender = choice((0, 1), p=[0.5, 0.5])
         self.illness = rn.choice(list(ILLNESSES.keys()))
         self.los = self.assign_a_los()
         self.discharge_prob = self.probability_distribution()
@@ -55,7 +57,7 @@ class Patient:
 
     # Returns average length of stay for each illness
     def assign_a_los(self):
-        los = ILLNESSES[self.illness]
+        los = ILLNESSES[self.illness][self.gender]
         return los
 
     # -NEEDS UPDATING TO EXPONENTIAL- Returns distribution of probability of leaving per day for given illness
@@ -88,3 +90,4 @@ if __name__ == '__main__':
     np.random.seed(SEED)
     rn.seed(SEED)
     run(SIM_TIME, AD_RATE)  # Begins simulation
+
