@@ -8,9 +8,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from colorama import Fore, Style
 from numpy.random import choice
+from scipy.stats import bernoulli
 
 
 # Simulation parameters
+PATIENT_INIT = 280          # Number of patients already in hospital at the beginning of simulation
 AD_RATE = 55                # Patient admission rate (number per day)
 SIM_TIME = 90               # Simulation run time (days)
 SEED = 1
@@ -38,8 +40,7 @@ class Hospital:
     def treat_patients(self, day):
         temp_patients = []
         for patients in self.patients_list:
-            if patients.discharge_prob[day - patients.ad_day] < np.random.random():
-                # Temporary list to store all patients who do not leave this day
+            if bernoulli.rvs(patients.discharge_prob[day - patients.ad_day]) == 0:
                 temp_patients.append(patients)
         print(f"Number of patients discharged: {len(self.patients_list) - len(temp_patients)}")
         self.patients_list = temp_patients
@@ -56,6 +57,21 @@ class Hospital:
         plt.xlabel(f"Day")
         plt.ylabel(f"Bed Occupancy (%)")
         plt.title(f"Hospital Bed Occupancy Forecast 3 Months in the Future")
+        plt.show()
+
+    def illness_breakdown(self):
+        patient_data = []
+        counts = []
+        for patient in self.patients_list:
+            patient_data.append(patient.__dict__)
+        df = pd.DataFrame(patient_data).drop('discharge_prob', axis=1)
+        illnesses = [*ILLNESSES]
+        for illness in illnesses:
+            counts.append(df['illness'].value_counts()[illness])
+        explode = (0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1)
+        plt.pie(counts, explode=explode, labels=illnesses, autopct='%1.1f%%', shadow=True)
+        plt.axis('equal')
+        plt.title('Percentage of Different Illnesses Present in Final Count')
         plt.show()
 
 
@@ -85,6 +101,8 @@ class Patient:
 # Runs the simulation using simulation parameters
 def run(days, ad_rate):
     hospital = Hospital()
+    for num in range(PATIENT_INIT):
+        hospital.patients_list.append(Patient(rn.randint(-30, 0)))  # Initialise hospital with existing patients
     for i in range(days):
         print(f"Day {i+1}")
         for j in range(ad_rate + 1):
@@ -96,6 +114,7 @@ def run(days, ad_rate):
         hospital.treat_patients(i)
         print(Fore.BLUE + f"Occupancy: {hospital.occupancy:.1f}%" + Style.RESET_ALL)
     hospital.show_results()
+    hospital.illness_breakdown()
 
 
 if __name__ == '__main__':
