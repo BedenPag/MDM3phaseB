@@ -8,11 +8,10 @@ Created on Tue Sep 27 18:07:54 2022
 
 import math
 import matplotlib.pyplot as plt
-import scipy.stats as sps
 import pandas as pd
 import numpy as np
-import seaborn as sns
-sns.set(style='ticks')
+from random import random
+
 
 mydata= pd.read_excel('C:/Users/HOM-0317-TB01/Documents/GitHub/MDM3phaseB/PlainData.xlsx')
 
@@ -32,7 +31,6 @@ data = []
 for i in means:
     data.append(np.random.exponential(i, beds))
 
-
 # Create a dictionary of the illness and the data
 illnessData = dict(zip(illness, data))
 
@@ -45,6 +43,7 @@ illnessData = dict(zip(illness, data))
 #    plt.ylabel('Probability')
 #    plt.show()
 
+ALLxydata = []
 # Plot each illness as a cumulative probability density function
 for i in illnessData:
     plt.hist(illnessData[i], density=True, cumulative=True, bins=int(max(illnessData[i])))
@@ -52,39 +51,70 @@ for i in illnessData:
     plt.xlabel('Days')
     plt.ylabel('Probability')
     # plot a line for the cumulative probability
-    twat = plt.plot(np.sort(illnessData[i]), np.linspace(0, 1, len(illnessData[i]), endpoint=False))
+    lineplot = plt.plot(np.sort(illnessData[i]), np.linspace(0, 1, len(illnessData[i]), endpoint=False))
     ax = plt.gca()
     line = ax.lines[0]
     xydata = line.get_xydata()
-    print(xydata)
+    ALLxydata.append(xydata)
     plt.show()
-    
+
+illnessLOSprobability = dict(zip(illness, ALLxydata))
+
+# q: which data point is closest to 1 for each ilness in illnessLOSprobability
 
 
 
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return array[idx]
+
+# find the first column of each illness in illnessLOSprobability
 
 
+Prob = []
+day = []
+ProbLeave = []
+iteration1 = 1
+dayNum = 0
+for i in illness: # for each illness
+    q = illnessLOSprobability[i][:,0]
+    while dayNum <= int(max(illnessData[i])): # for each day
+        dayNum = dayNum + 1
+        for j in q:
+            nearest = find_nearest(q,why) # find the nearest value to that day
+            if j == nearest: # if nearest value is found 
+                prob = illnessLOSprobability[i][iteration1,1] # find the corisponding probability of leaving
+                iteration1 = 0
+                Prob.append(prob)
+                day.append(dayNum)
+                break
+            iteration1 = iteration1 +1
+        arr = np.stack((day, Prob), axis=1)
+    ProbLeave.append(arr)
+        
+    why = 0
 
-# for each x in the probability density function, give it its y value
-#for i in illnessData:
-#    for x in illnessData[i]:
-#        y = (1/i)*math.exp(-x/i)
-#        print(y)
-#        plt.plot(x,y)
-#        plt.show()
+ProbDic = dict(zip(illness,ProbLeave))
 
+# 
 
 
 admission = 55
-dailyAdmissions = []
 # For each admission, give them a random illness
 for i in range(admission):
     # Choose a random illness
     illnessName = np.random.choice(list(illnessData.keys()))
     # Find a number of days for that illness following a probability distribution
-    days = np.random.choice(illnessData[illnessName])
+    for i in ProbDic[illnessName][:,0]:
+        j = random()
+        if j < ProbDic[illnessName][int(i),1]:
+            days = int(i)
+            break
     # Create a dictionary of the illness and the days
-    dailyAdmissions.append({illness:days})
+    dailyAdmissions = np.stack((illnessName, days))
+    print(dailyAdmissions)
+
 
 
 
