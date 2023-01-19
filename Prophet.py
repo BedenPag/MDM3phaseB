@@ -3,8 +3,6 @@
 from prophet import Prophet
 from prophet.plot import plot_plotly, plot_components_plotly
 import pandas as pd
-from google.colab import drive
-drive.mount('/content/drive')
 
 filenamewnhs = '/content/drive/MyDrive/mdmnhs/occwalesnhs.csv'
 df = pd.read_csv(filenamewnhs,sep=';')
