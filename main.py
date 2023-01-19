@@ -5,6 +5,7 @@
 import random as rn
 import numpy as np
 import pandas as pd
+import math
 import matplotlib.pyplot as plt
 from colorama import Fore, Style
 from numpy.random import choice
@@ -12,7 +13,7 @@ from scipy.stats import bernoulli
 
 
 # Simulation parameters
-PATIENT_INIT = 280          # Number of patients already in hospital at the beginning of simulation
+PATIENT_INIT = 200          # Number of patients already in hospital at the beginning of simulation
 AD_RATE = 55                # Patient admission rate (number per day)
 SIM_TIME = 90               # Simulation run time (days)
 SEED = 1
@@ -40,7 +41,9 @@ class Hospital:
     def treat_patients(self, day):
         temp_patients = []
         for patients in self.patients_list:
-            if bernoulli.rvs(patients.discharge_prob[day - patients.ad_day]) == 0:
+            patients.update_probability()
+            if bernoulli.rvs(patients.discharge_prob) == 0:
+                patients.los += 1
                 temp_patients.append(patients)
         print(f"Number of patients discharged: {len(self.patients_list) - len(temp_patients)}")
         self.patients_list = temp_patients
@@ -82,27 +85,30 @@ class Patient:
         self.gender = choice((0, 1), p=[0.5, 0.5])
         self.illness = rn.choice(list(ILLNESSES.keys()))
         self.av_los = self.assign_a_los()
-        self.discharge_prob = self.probability_distribution()
         self.ad_day = admission
+        self.los = self.los_calculate()
+        self.discharge_prob = 0
 
     # Returns average length of stay for each illness
     def assign_a_los(self):
         los = ILLNESSES[self.illness][self.gender]
         return los
 
-    # Returns distribution of probability of leaving per day for given illness
-    def probability_distribution(self):
-        dist = sorted(np.random.exponential(self.av_los, size=100))
-        dist = np.cumsum(dist)
-        dist = dist/dist[-1]
-        return dist
+    def los_calculate(self):
+        if self.ad_day < 0:
+            return abs(self.ad_day)
+        else:
+            return 0
+
+    def update_probability(self):
+        self.discharge_prob = 1 - math.e**(-((1/self.av_los)*self.los))
 
 
 # Runs the simulation using simulation parameters
 def run(days, ad_rate):
     hospital = Hospital()
     for num in range(PATIENT_INIT):
-        hospital.patients_list.append(Patient(rn.randint(-30, 0)))  # Initialise hospital with existing patients
+        hospital.patients_list.append(Patient(rn.randint(-2, 0)))  # Initialise hospital with existing patients
     for i in range(days):
         print(f"Day {i+1}")
         for j in range(ad_rate + 1):
