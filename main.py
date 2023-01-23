@@ -18,15 +18,25 @@ AD_RATE = 55                # Patient admission rate (number per day)
 SIM_TIME = 90               # Simulation run time (days)
 SEED = 1
 ILLNESSES = {
-    'Myocardial Infarction': [7.3, 6.5],
-    'Stroke': [27.2, 29.2],
-    'COVID 19': [15.7, 16.2],
-    'Fracture of Femur': [32.3, 28.8],                         # Dictionary of illnesses and their aLOS (male/female)
-    'Atrial Fibrillation': [4.4, 4.1],
-    'Pneumonia': [13.8, 16.0],
-    'Endocrine, Nutritional and Metabolic Diseases': [4.0, 3.0],
-    'COPD': [6.8, 7.3]
+    'Myocardial Infarction': [0, [0.65, 0.35], [7.3, 6.5]],
+    'Stroke': [1, [0.55, 0.45], [27.2, 29.2]],
+    'COVID 19': [2, [0.55, 0.45], [15.7, 16.2]],
+    'Fracture of Femur': [3, [0.35, 0.65], [32.3, 28.8]],                         # Dictionary of illnesses and their aLOS (male/female)
+    'Atrial Fibrillation': [4, [0.55, 0.45], [4.4, 4.1]],
+    'Pneumonia': [5, [0.50, 0.50], [13.8, 16.0]],
+    'Endocrine, Nutritional and Metabolic Diseases': [6, [0.55, 0.45], [4.0, 3.0]],
+    'COPD': [7, [0.45, 0.55], [6.8, 7.3]]
 }
+AGE_PROB = [
+    [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+]
 
 
 # Hospital object that treats Patient objects
@@ -82,8 +92,12 @@ class Hospital:
 class Patient:
 
     def __init__(self, admission):
-        self.gender = choice((0, 1), p=[0.5, 0.5])
-        self.illness = rn.choice(list(ILLNESSES.keys()))
+        self.illness = choice(list(ILLNESSES.keys()), p=[0.10, 0.08, 0.15, 0.06, 0.08, 0.20, 0.23, 0.10])
+        self.gender = choice((0, 1), p=ILLNESSES[self.illness][1])
+        self.age = choice(choice([range(0, 9), range(10, 19), range(20, 29), range(30, 39),
+                                       range(40, 49), range(50, 59), range(60, 69), 
+                                       range(70, 79), range(80, 89), range(90, 100)],
+                                      p=AGE_PROB[ILLNESSES[self.illness][0]]))
         self.av_los = self.assign_a_los()
         self.ad_day = admission
         self.los = self.los_calculate()
@@ -91,7 +105,8 @@ class Patient:
 
     # Returns average length of stay for each illness
     def assign_a_los(self):
-        los = ILLNESSES[self.illness][self.gender]
+        age_factor = 1
+        los = ILLNESSES[self.illness][2][self.gender] * age_factor
         return los
 
     def los_calculate(self):
