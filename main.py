@@ -14,10 +14,10 @@ from scipy.stats import bernoulli
 
 # Simulation parameters
 PATIENT_INIT = 0         # Number of patients already in hospital at the beginning of simulation
-AD_RATE = 10                # Patient admission rate (number per day)
+AD_RATE = 55                # Patient admission rate (number per day)
 BASE = 30                   # Time to allow initialisation errors to dissipate
 SIM_TIME = BASE + 90        # Simulation run time (days)
-SIM_NUMS = 3
+SIM_NUMS = 1
 SEED = 1
 ILLNESSES = {
     'Myocardial Infarction': [0, [0.666, 0.334], [7.3, 6.5]],
@@ -101,15 +101,20 @@ class Patient:
                                        range(40, 49), range(50, 59), range(60, 69), 
                                        range(70, 79), range(80, 89), range(90, 100)],
                                       p=AGE_PROB[ILLNESSES[self.illness][0]]))
+        self.age_factor = self.age_factor()
         self.av_los = self.assign_a_los()
         self.ad_day = admission
         self.los = self.los_calculate()
         self.discharge_prob = 0
 
+    def age_factor(self):
+        idx = int(self.age/10)
+        age_factors = np.array([0.772, 0.9219, 0.9493, 0.9676, 0.9927, 1.0155, 1.0818, 1.0840, 1.1229, 1.9322])
+        return age_factors[idx]
+
     # Returns average length of stay for each illness
     def assign_a_los(self):
-        age_factor = 1
-        los = ILLNESSES[self.illness][2][self.gender] * age_factor
+        los = ILLNESSES[self.illness][2][self.gender] * self.age_factor
         return los
 
     def los_calculate(self):
@@ -146,7 +151,7 @@ def plot_results(result):
     for data in result:
         plt.plot(np.linspace(1, SIM_TIME - BASE, SIM_TIME - BASE), data[BASE:SIM_TIME])
     plt.xlabel(f"Day")
-    plt.ylabel(f"Bed Occupancy (%)")
+    plt.ylabel(f"Bed Occupancy (\%)")
     plt.title(f"Hospital Bed Occupancy Forecast 3 Months in the Future")
     plt.show()
 
