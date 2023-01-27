@@ -14,7 +14,7 @@ from scipy.stats import bernoulli
 
 # Simulation parameters
 PATIENT_INIT = 0         # Number of patients already in hospital at the beginning of simulation
-AD_RATE = 55                # Patient admission rate (number per day)
+AD_RATE = 10                # Patient admission rate (number per day)
 BASE = 30                   # Time to allow initialisation errors to dissipate
 SIM_TIME = BASE + 90        # Simulation run time (days)
 SIM_NUMS = 3
@@ -39,6 +39,7 @@ AGE_PROB = [
     [0.039002, 0.043393, 0.054660, 0.074321, 0.096695, 0.158375, 0.174663, 0.185326, 0.137744, 0.035821],
     [0.000608, 0.000227, 0.000567, 0.003987, 0.025790, 0.102994, 0.232143, 0.367922, 0.225822, 0.039940]
 ]
+plt.rcParams.update({"text.usetex": True})
 
 
 # Hospital object that treats Patient objects
