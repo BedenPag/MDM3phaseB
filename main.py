@@ -15,10 +15,10 @@ from scipy.stats import bernoulli
 # Simulation parameters
 PATIENT_INIT = 0         # Number of patients already in hospital at the beginning of simulation
 AD_RATE = 55                # Patient admission rate (number per day)
-BASE = 30                   # Time to allow initialisation errors to dissipate
+BASE = 15                   # Time to allow initialisation errors to dissipate
 SIM_TIME = BASE + 90        # Simulation run time (days)
-SIM_NUMS = 1
-SEED = 1
+SIM_NUMS = 2
+SEED = 2
 ILLNESSES = {
     'Myocardial Infarction': [0, [0.666, 0.334], [7.3, 6.5]],
     'Stroke': [1, [0.526, 0.474], [27.2, 29.2]],
@@ -39,7 +39,7 @@ AGE_PROB = [
     [0.039002, 0.043393, 0.054660, 0.074321, 0.096695, 0.158375, 0.174663, 0.185326, 0.137744, 0.035821],
     [0.000608, 0.000227, 0.000567, 0.003987, 0.025790, 0.102994, 0.232143, 0.367922, 0.225822, 0.039940]
 ]
-plt.rcParams.update({"text.usetex": True})
+plt.rcParams.update({"text.usetex": True, 'font.size': 14})
 
 
 # Hospital object that treats Patient objects
@@ -50,6 +50,7 @@ class Hospital:
         self.patients_list = []                                         # List of all active patients
         self.occupancy = (len(self.patients_list) / self.beds)*100      # Percentage occupancy of beds
         self.occupancy_timeline = np.zeros(SIM_TIME)
+        self.discharge_timeline = np.zeros(SIM_TIME)
 
     def treat_patients(self, day):
         temp_patients = []
@@ -58,10 +59,13 @@ class Hospital:
             if bernoulli.rvs(patients.discharge_prob) == 0:
                 patients.los += 1
                 temp_patients.append(patients)
-        print(f"Number of patients discharged: {len(self.patients_list) - len(temp_patients)}")
+        num_discharged = len(self.patients_list) - len(temp_patients)
+        print(f"Number of patients discharged: {num_discharged}")
         self.patients_list = temp_patients
         self.occupancy = len(self.patients_list) / self.beds * 100
         self.occupancy_timeline[day] = self.occupancy
+        self.discharge_timeline[day] = num_discharged
+
 
     def show_results(self):
         patient_data = []
@@ -148,18 +152,27 @@ def run(days, ad_rate):
 
 
 def plot_results(result):
-    for data in result:
-        plt.plot(np.linspace(1, SIM_TIME - BASE, SIM_TIME - BASE), data[BASE:SIM_TIME])
+    iterations = []
+    colours = ['blue', 'red', 'black', 'orange', 'green']
+    for i in range(len(result)):
+        iterations.append(f"Iteration {i + 1}")
+        iterations.append(f"Average {i + 1}")
+        idx = i % len(colours)
+        plt.plot(np.linspace(1, SIM_TIME - BASE, SIM_TIME - BASE), result[i][BASE:SIM_TIME], color=colours[idx])
+        plt.axhline(y=np.mean(result[i][BASE:SIM_TIME]), linestyle='--', color=colours[idx])
     plt.xlabel(f"Day")
     plt.ylabel(f"Bed Occupancy (\%)")
-    plt.title(f"Hospital Bed Occupancy Forecast 3 Months in the Future")
+    plt.title(f"Hospital Bed Occupancy Forecast (3 Month Prediction)")
+    plt.grid()
+    plt.legend(iterations, loc='upper right')
     plt.show()
+
 
 if __name__ == '__main__':
     print(f"Start Simulation")
     # Allows repeat results i.e same random values generated per seed
-    # np.random.seed(SEED)
-    # rn.seed(SEED)
+    np.random.seed(SEED)
+    rn.seed(SEED)
     results = np.zeros((SIM_NUMS, SIM_TIME))
     for i in range(SIM_NUMS):
         results[i] = run(SIM_TIME, AD_RATE)  # Runs simulation

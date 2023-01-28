@@ -41,7 +41,7 @@ def plot_data(data):
     plt.show()
 
 
-plt.rcParams.update({"text.usetex": True})
+plt.rcParams.update({"text.usetex": True, 'font.size': 14})
 illnesses = ["Pneumonia, Organism Unspecified", "Acute Myocardial Infarction", "Cerebral Infarction (Stroke)",					
             "Covid-19",	"Atrial Fibrillation", "Femer Fracture", "Endocrine, Nutritional and Metabolic Diseases",					
             "Other Chronic Obstructive Pulmonary Disease"	
