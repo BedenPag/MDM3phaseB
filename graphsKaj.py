@@ -59,3 +59,16 @@ plt.setp(ax.get_xticklabels(), rotation=30, ha='right')
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
 plt.show()
+
+# MALE/FEMALE
+df = pd.DataFrame({'Male': [0.506, 0.666, 0.526, 0.533, 0.541, 0.327, 0.497, 0.450],
+                  'Female': [0.494, 0.334, 0.474, 0.467, 0.458, 0.673, 0.502, 0.550]},
+                index = ["Pneumonia", "Myocardial \n Infarction", "Stroke", "Covid-19",	"Atrial \n Fibrillation", "Femer \n Fracture", "Nutritional & \n Metabolic \n Diseases","Other \n Pulmonary \n Disease"])
+ax = df.plot(kind='bar', stacked=True, width = width, figsize = (10, 7))
+plt.xlabel('Condition')
+plt.ylabel('Proportion')
+plt.title('Proportion of Male and Female Patients with Each Condition')
+plt.setp(ax.get_xticklabels(), rotation=30, ha='right')
+plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+plt.show()
