@@ -38,7 +38,7 @@ import pandas as pd
 
 # plt.show()
 
-plt.rcParams.update({"text.usetex": True, 'font.size': 14})
+# plt.rcParams.update({"text.usetex": True, 'font.size': 14})
 
 width = 0.9
 
@@ -52,7 +52,7 @@ df = pd.DataFrame({'0-9': [0.018408, 0.000048, 0.0008, 0.032112, 0.000093, 0.010
                    '70-79': [0.257947, 0.261483, 0.273102, 0.184304, 0.313501, 0.22427, 0.185326, 0.367922],
                    '80-89': [0.311395, 0.198051, 0.301036, 0.164978, 0.237352, 0.403928, 0.137744, 0.225822],
                    '90+': [0.141568, 0.053671, 0.106823, 0.057836, 0.06459, 0.213823, 0.03582, 0.039941]},
-                index = ["Pneumonia", "Myocardial Infarction", "Stroke", "Covid-19",	"Atrial Fibrillation", "Femer Fracture", "Nutritional \& Metabolic Diseases","Other Pulmonary Disease"])
+                index = ["Pneumonia", "Myocardial Infarction", "Stroke", "Covid-19",	"Atrial Fibrillation", "Femur Fracture", "Nutritional \& Metabolic Diseases","Other Pulmonary Disease"])
 ax = df.plot(kind='bar', stacked=True, width = width, figsize = (10, 7))
 plt.xlabel('Condition')
 plt.ylabel('Proportion')
@@ -65,12 +65,38 @@ plt.show()
 # MALE/FEMALE
 df = pd.DataFrame({'Male': [0.506, 0.666, 0.526, 0.533, 0.541, 0.327, 0.497, 0.450],
                   'Female': [0.494, 0.334, 0.474, 0.467, 0.458, 0.673, 0.502, 0.550]},
-                index = ["Pneumonia", "Myocardial Infarction", "Stroke", "Covid-19",	"Atrial Fibrillation", "Femer Fracture", "Nutritional \& Metabolic Diseases","Other Pulmonary Disease"])
+                index = ["Pneumonia", "Myocardial Infarction", "Stroke", "Covid-19",	"Atrial Fibrillation", "Femur Fracture", "Nutritional \& Metabolic Diseases","Other Pulmonary Disease"])
 ax = df.plot(kind='bar', stacked=True, width = width, figsize = (10, 7))
 plt.xlabel('Condition')
 plt.ylabel('Proportion')
 plt.title('Proportion of Male and Female Patients with Each Condition')
 plt.setp(ax.get_xticklabels(), rotation=30, ha='right')
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+plt.show()
+
+# MALE FEMALE AV LOS
+labels = ["Pneumonia", "Myocardial Infarction", "Stroke", "Covid-19",	"Atrial Fibrillation", "Femur Fracture", "Nutritional \& Metabolic Diseases","Other Pulmonary Disease"]
+men_means = [16, 6.5, 29.2, 16.2, 4.1, 28.8, 3, 7.3]
+women_means = [13.8, 7.3, 27.2, 15.7, 4.4, 32.3, 4, 6.8]
+
+
+x = np.arange(len(labels))  # the label locations
+width = 0.35  # the width of the bars
+
+fig, ax = plt.subplots()
+rects1 = ax.bar(x - width/2, men_means, width, label='Male')
+rects2 = ax.bar(x + width/2, women_means, width, label='Female')
+
+# Add some text for labels, title and custom x-axis tick labels, etc.
+ax.set_ylabel('Average LOS (days)')
+ax.set_title('Average LOS for Male and Female Patients with each Condition')
+ax.set_xticks(x, labels, rotation=30, ha='right')
+ax.legend()
+
+#ax.bar_label(rects1, padding=3)
+#ax.bar_label(rects2, padding=3)
+
+fig.tight_layout()
 
 plt.show()
