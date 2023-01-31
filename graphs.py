@@ -43,10 +43,10 @@ def plot_data(data):
 
 plt.rcParams.update({"text.usetex": True, 'font.size': 14})
 illnesses = ["Pneumonia, Organism Unspecified", "Acute Myocardial Infarction", "Cerebral Infarction (Stroke)",					
-            "Covid-19",	"Atrial Fibrillation", "Femer Fracture", "Endocrine, Nutritional and Metabolic Diseases",					
+            "Covid-19",	"Atrial Fibrillation", "Femur Fracture", "Endocrine, Nutritional and Metabolic Diseases",					
             "Other Chronic Obstructive Pulmonary Disease"	
 ]				
 proportions = np.array([0.2001, 0.0867, 0.0826, 0.1505, 0.0833, 0.0617, 0.2346, 0.1005])
 df = pd.read_csv('nhsinitialdata.csv')
 plot_proportions(proportions, illnesses)
-plot_data(df)
+# plot_data(df)

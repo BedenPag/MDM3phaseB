@@ -17,7 +17,7 @@ PATIENT_INIT = 0         # Number of patients already in hospital at the beginni
 AD_RATE = 55                # Patient admission rate (number per day)
 BASE = 15                   # Time to allow initialisation errors to dissipate
 SIM_TIME = BASE + 90        # Simulation run time (days)
-SIM_NUMS = 2
+SIM_NUMS = 10
 SEED = 2
 ILLNESSES = {
     'Myocardial Infarction': [0, [0.666, 0.334], [7.3, 6.5]],
@@ -60,7 +60,7 @@ class Hospital:
                 patients.los += 1
                 temp_patients.append(patients)
         num_discharged = len(self.patients_list) - len(temp_patients)
-        print(f"Number of patients discharged: {num_discharged}")
+        # print(f"Number of patients discharged: {num_discharged}")
         self.patients_list = temp_patients
         self.occupancy = len(self.patients_list) / self.beds * 100
         self.occupancy_timeline[day] = self.occupancy
@@ -98,15 +98,17 @@ class Hospital:
 # Patient object to be treated by hospital
 class Patient:
 
-    def __init__(self, admission):
+    def __init__(self, admission, los_factor):
         self.illness = choice(list(ILLNESSES.keys()), p=[0.10, 0.08, 0.15, 0.06, 0.08, 0.20, 0.23, 0.10])
+        # original probabilities p=[0.10, 0.08, 0.15, 0.06, 0.08, 0.20, 0.23, 0.10]
+        # pandemic probabilities p=[0.04, 0.03, 0.75, 0.04, 0.03, 0.04, 0.03, 0.04]
         self.gender = choice((0, 1), p=ILLNESSES[self.illness][1])
         self.age = choice(choice([range(0, 9), range(10, 19), range(20, 29), range(30, 39),
                                        range(40, 49), range(50, 59), range(60, 69), 
                                        range(70, 79), range(80, 89), range(90, 100)],
                                       p=AGE_PROB[ILLNESSES[self.illness][0]]))
         self.age_factor = self.age_factor()
-        self.av_los = self.assign_a_los()
+        self.av_los = self.assign_a_los() * los_factor
         self.ad_day = admission
         self.los = self.los_calculate()
         self.discharge_prob = 0
@@ -132,41 +134,57 @@ class Patient:
 
 
 # Runs the simulation using simulation parameters
-def run(days, ad_rate):
+def run(days, ad_rate, los_factor):
     hospital = Hospital()
     for num in range(PATIENT_INIT):
-        hospital.patients_list.append(Patient(rn.randint(-2, 0)))  # Initialise hospital with existing patients
+        hospital.patients_list.append(Patient(rn.randint(-2, 0), 1))  # Initialise hospital with existing patients
     for i in range(days):
-        print(f"Day {i+1}")
+        # print(f"Day {i+1}")
         for j in range(ad_rate + 1):
             if len(hospital.patients_list) < hospital.beds:         # Checks bed occupancy hasn't been reached
-                hospital.patients_list.append(Patient(i))  # Patients get admitted if there is an available bed
+                hospital.patients_list.append(Patient(i, los_factor))  # Patients get admitted if there is an available bed
             else:
                 break
-        print(f"Number of patients admitted: {j}")
+        # print(f"Number of patients admitted: {j}")
         hospital.treat_patients(i)
-        print(Fore.BLUE + f"Occupancy: {hospital.occupancy:.1f}%" + Style.RESET_ALL)
+        # print(Fore.BLUE + f"Occupancy: {hospital.occupancy:.1f}%" + Style.RESET_ALL)
     # hospital.show_results()
     # hospital.illness_breakdown()
-    return hospital.occupancy_timeline
+    avg_discharge = np.mean(hospital.discharge_timeline)
+    print(f"Average Discharge Rate: {avg_discharge:.2f}")
+    return hospital.occupancy_timeline, avg_discharge
 
 
 def plot_results(result):
     iterations = []
-    colours = ['blue', 'red', 'black', 'orange', 'green']
-    for i in range(len(result)):
+    colours = ['red', 'blue', 'orange', 'green']
+    for i in range(1):
         iterations.append(f"Iteration {i + 1}")
         iterations.append(f"Average {i + 1}")
         idx = i % len(colours)
         plt.plot(np.linspace(1, SIM_TIME - BASE, SIM_TIME - BASE), result[i][BASE:SIM_TIME], color=colours[idx])
         plt.axhline(y=np.mean(result[i][BASE:SIM_TIME]), linestyle='--', color=colours[idx])
+    avg = np.sum(result, axis=0)/len(result)
+    iterations.append(f"{SIM_NUMS} Iteration Average")
+    plt.plot(np.linspace(1, SIM_TIME - BASE, SIM_TIME - BASE), avg[BASE:SIM_TIME], 
+             color='black', linewidth=2)
     plt.xlabel(f"Day")
     plt.ylabel(f"Bed Occupancy (\%)")
     plt.title(f"Hospital Bed Occupancy Forecast (3 Month Prediction)")
     plt.grid()
     plt.legend(iterations, loc='upper right')
     plt.show()
+    
+    
+def plot_discharge(los_factor, rates):
+    plt.plot(los_factor, rates, linestyle='dashdot', color='black')
+    plt.xlabel(f"LOS factor")
+    plt.ylabel(f"Discharge Rate (patients per day)")
+    plt.title(f"Average discharge rate as a function of LOS")
+    plt.grid()
+    plt.show()
 
+    
 
 if __name__ == '__main__':
     print(f"Start Simulation")
@@ -174,7 +192,10 @@ if __name__ == '__main__':
     np.random.seed(SEED)
     rn.seed(SEED)
     results = np.zeros((SIM_NUMS, SIM_TIME))
+    discharge_rate = np.zeros(SIM_NUMS)
+    los_factor = np.linspace(0.5, 1.5, SIM_NUMS)
     for i in range(SIM_NUMS):
-        results[i] = run(SIM_TIME, AD_RATE)  # Runs simulation
-    plot_results(results)
+        (results[i], discharge_rate[i]) = run(SIM_TIME, AD_RATE, los_factor[i])  # Runs simulation
+    # plot_results(results)
+    plot_discharge(los_factor, discharge_rate)
 		

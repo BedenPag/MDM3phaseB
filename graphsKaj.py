@@ -38,7 +38,7 @@ import pandas as pd
 
 # plt.show()
 
-# plt.rcParams.update({"text.usetex": True, 'font.size': 14})
+plt.rcParams.update({"text.usetex": True, 'font.size': 14})
 
 width = 0.9
 
@@ -90,9 +90,11 @@ rects2 = ax.bar(x + width/2, women_means, width, label='Female')
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
 ax.set_ylabel('Average LOS (days)')
+ax.set_xlabel('Condition')
 ax.set_title('Average LOS for Male and Female Patients with each Condition')
 ax.set_xticks(x, labels, rotation=30, ha='right')
 ax.legend()
+ax.grid()
 
 #ax.bar_label(rects1, padding=3)
 #ax.bar_label(rects2, padding=3)
